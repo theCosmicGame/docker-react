@@ -1,0 +1,27 @@
+sudo: required    # need this every time we run docker
+language: generic
+
+# we need these services pre-installed
+services:
+  - docker
+
+# before tests are ran
+before_install:
+  - docker build -t bridgetmelvin/docker-react -f Dockerfile.dev .
+
+# tell travis how to run our test suite
+script:
+  - docker run -e CI=true bridgetmelvin/docker-react npm run test
+
+# deploy app to aws
+deploy:
+  provider: elasticbeanstalk
+  region: 'us-east-1'
+  app: 'docker'
+  env: 'docker-env'
+  bucket_name: 'elasticbeanstalk-us-east-1-923445559289'
+  bucket_path: 'docker'
+  on:
+    branch: main
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
